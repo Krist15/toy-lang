@@ -1,4 +1,5 @@
 mod Run;
+mod token_type;
 
 use Run::Lox;
 

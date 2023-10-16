@@ -1,3 +1,6 @@
+use crate::scanner::Scanner;
+use crate::token::Token;
+
 use std::io::BufRead;
 
 pub struct Lox {
@@ -26,7 +29,7 @@ impl Lox {
         loop {
             println!("> ");
             let mut line = String::new();
-            reader.read_line(&mut line);
+            reader.read_line(&mut line).unwrap();
             if line.is_empty() {
                 break;
             }
@@ -38,16 +41,16 @@ impl Lox {
         Ok(())
     }
 
-    fn run(&self, source: &str) {
-        let scanner = Scanner::new();
-        let tokens: Vec<Tokens> = scanner.scan_tokens();
+    pub fn run(&self, source: &str) {
+        let mut scanner = Scanner::new(source.to_owned());
+        let tokens: Vec<Token> = scanner.scan_tokens();
 
         for token in tokens {
-            println!("{:?}", tokens);
+            println!("{:?}", token);
         }
     }
 
-    pub fn error(&self, line: u32, message: &str) {
+    pub fn error(&mut self, line: u32, message: &str) {
         self.report(line, "", message);
     }
 

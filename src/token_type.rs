@@ -1,5 +1,7 @@
+use strum_macros::Display;
+
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Display)]
 pub enum TokenType {
     // Single-character tokens.
     LEFT_PAREN,

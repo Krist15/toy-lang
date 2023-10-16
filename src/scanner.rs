@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
+    run::Lox,
     token::{Object, Token},
     token_type::TokenType,
-    Run::Lox,
 };
 use substring::Substring;
 
@@ -65,7 +65,7 @@ impl Scanner {
             self.line,
         ));
 
-        self.tokens
+        self.tokens.to_owned()
     }
 
     fn scan_token(&mut self) {
@@ -115,6 +115,8 @@ impl Scanner {
                     while self.peek() != '\n' && self.is_at_end() {
                         self.advance();
                     }
+                } else {
+                    self.add_token(TokenType::SLASH);
                 }
             }
             ' ' => {}
@@ -132,20 +134,22 @@ impl Scanner {
                 } else if self.is_alpha(c) {
                     self.identifier();
                 } else {
-                    let lox = Lox::new();
+                    let mut lox = Lox::new();
                     lox.error(self.line, "Unexpected character");
                 }
             }
         }
     }
 
-    fn identifier(&self) {
+    fn identifier(&mut self) {
         while self.is_alpha_numeric(self.peek()) {
             self.advance();
         }
 
         let text = self.source.substring(self.start, self.current);
-        let mut token_type = KEYWORDS.get(text).unwrap_or(&TokenType::IDENTIFIER);
+
+        let token_type = KEYWORDS.get(text).unwrap_or(&TokenType::IDENTIFIER);
+
         self.add_token(token_type.to_owned());
     }
 
@@ -182,7 +186,7 @@ impl Scanner {
     }
 
     fn is_alpha(&self, c: char) -> bool {
-        (c >= 'a' && c <= 'z') || (c <= 'A' && c <= 'Z') || c == '_'
+        (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
     }
 
     fn is_alpha_numeric(&self, c: char) -> bool {
@@ -198,7 +202,7 @@ impl Scanner {
         }
 
         if self.is_at_end() {
-            let error = Lox::new();
+            let mut error = Lox::new();
             error.error(self.line, "Unterminated string");
             return;
         }
@@ -212,7 +216,7 @@ impl Scanner {
         self._add_token(TokenType::STRING, Some(Object::String(value)));
     }
 
-    fn match_char(&self, expected: char) -> bool {
+    fn match_char(&mut self, expected: char) -> bool {
         if self.is_at_end() {
             return false;
         }
@@ -234,11 +238,11 @@ impl Scanner {
         return c >= '0' && c <= '9';
     }
 
-    fn add_token(&self, token_type: TokenType) {
+    fn add_token(&mut self, token_type: TokenType) {
         self._add_token(token_type, None)
     }
 
-    fn _add_token(&self, token_type: TokenType, literal: Option<Object>) {
+    fn _add_token(&mut self, token_type: TokenType, literal: Option<Object>) {
         let text = self.source.substring(self.start, self.current);
         self.tokens
             .push(Token::new(token_type, text.to_owned(), literal, self.line))

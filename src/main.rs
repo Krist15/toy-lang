@@ -1,4 +1,4 @@
-mod Run;
+mod run;
 mod scanner;
 mod token;
 mod token_type;
@@ -6,7 +6,7 @@ mod token_type;
 #[macro_use]
 extern crate lazy_static;
 
-use Run::Lox;
+use run::Lox;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -15,9 +15,11 @@ fn main() {
     if args.len() > 1 {
         println!("Usage: toylang [script]");
         std::process::exit(1);
-    } else if args.len() == 1 {
-        run.run_file(&args[0].as_str());
+    }
+    if args.len() == 2 {
+        run.run_file(&args[0].as_str()).unwrap();
+        println!("Hello");
     } else {
-        run.run_prompt();
+        run.run_prompt().unwrap();
     }
 }

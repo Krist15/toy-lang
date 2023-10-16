@@ -3,6 +3,9 @@ mod scanner;
 mod token;
 mod token_type;
 
+#[macro_use]
+extern crate lazy_static;
+
 use Run::Lox;
 
 fn main() {

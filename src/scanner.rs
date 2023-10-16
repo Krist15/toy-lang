@@ -1,10 +1,13 @@
+use std::collections::HashMap;
+
 use crate::{
     token::{Object, Token},
     token_type::TokenType,
     Run::Lox,
 };
-
 use substring::Substring;
+
+extern crate lazy_static;
 
 pub struct Scanner {
     source: String,
@@ -12,6 +15,29 @@ pub struct Scanner {
     start: usize,
     current: usize,
     line: u32,
+}
+
+lazy_static! {
+    pub static ref KEYWORDS: HashMap<String, TokenType> = {
+        let mut keywords = HashMap::new();
+        keywords.insert("and".to_string(), TokenType::AND);
+        keywords.insert("class".to_string(), TokenType::CLASS);
+        keywords.insert("else".to_string(), TokenType::ELSE);
+        keywords.insert("false".to_string(), TokenType::FALSE);
+        keywords.insert("for".to_string(), TokenType::FOR);
+        keywords.insert("fun".to_string(), TokenType::FUN);
+        keywords.insert("if".to_string(), TokenType::IF);
+        keywords.insert("nil".to_string(), TokenType::NIL);
+        keywords.insert("or".to_string(), TokenType::OR);
+        keywords.insert("print".to_string(), TokenType::PRINT);
+        keywords.insert("return".to_string(), TokenType::RETURN);
+        keywords.insert("super".to_string(), TokenType::SUPER);
+        keywords.insert("this".to_string(), TokenType::THIS);
+        keywords.insert("true".to_string(), TokenType::TRUE);
+        keywords.insert("var".to_string(), TokenType::VAR);
+        keywords.insert("while".to_string(), TokenType::WHILE);
+        keywords
+    };
 }
 
 impl Scanner {
@@ -118,7 +144,9 @@ impl Scanner {
             self.advance();
         }
 
-        self.add_token(TokenType::IDENTIFIER);
+        let text = self.source.substring(self.start, self.current);
+        let mut token_type = KEYWORDS.get(text).unwrap_or(&TokenType::IDENTIFIER);
+        self.add_token(token_type.to_owned());
     }
 
     fn number(&mut self) {

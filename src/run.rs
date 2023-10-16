@@ -47,7 +47,7 @@ impl Lox {
         }
     }
 
-    fn error(&self, line: u32, message: &str) {
+    pub fn error(&self, line: u32, message: &str) {
         self.report(line, "", message);
     }
 

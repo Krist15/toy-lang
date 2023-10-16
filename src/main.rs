@@ -1,4 +1,6 @@
 mod Run;
+mod scanner;
+mod token;
 mod token_type;
 
 use Run::Lox;

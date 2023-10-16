@@ -97,11 +97,73 @@ impl Scanner {
             '\n' => {
                 self.line += 1;
             }
+            '"' => {
+                self.string();
+            }
             _ => {
-                let lox = Lox::new();
-                lox.error(self.line, "Unexpected character");
+                if self.is_digit(c) {
+                    self.number();
+                } else {
+                    let lox = Lox::new();
+                    lox.error(self.line, "Unexpected character");
+                }
             }
         }
+    }
+
+    fn number(&mut self) {
+        while self.is_digit(self.peek()) {
+            self.advance();
+        }
+
+        if self.peek() == '.' && self.is_digit(self.peek_next()) {
+            self.advance();
+
+            while self.is_digit(self.peek()) {
+                self.advance();
+            }
+        }
+
+        self._add_token(
+            TokenType::NUMBER,
+            Some(Object::Number(
+                self.source
+                    .substring(self.start, self.current)
+                    .to_string()
+                    .parse::<f64>()
+                    .unwrap(),
+            )),
+        )
+    }
+
+    fn peek_next(&self) -> char {
+        if self.current + 1 >= self.source.len() {
+            return '\0';
+        }
+        return self.source.chars().nth(self.current + 1).unwrap();
+    }
+
+    fn string(&mut self) {
+        while self.peek() != '"' && self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            let error = Lox::new();
+            error.error(self.line, "Unterminated string");
+            return;
+        }
+
+        self.advance();
+
+        let value = self
+            .source
+            .substring(self.start + 1, self.current - 1)
+            .to_string();
+        self._add_token(TokenType::STRING, Some(Object::String(value)));
     }
 
     fn match_char(&self, expected: char) -> bool {
@@ -122,18 +184,18 @@ impl Scanner {
         return self.source.chars().nth(self.current).unwrap();
     }
 
-    fn add_token(&self, token_type: TokenType) {
-        self._add_token(token_type, Object::Nil)
+    fn is_digit(&self, c: char) -> bool {
+        return c >= '0' && c <= '9';
     }
 
-    fn _add_token(&self, token_type: TokenType, literal: Object) {
+    fn add_token(&self, token_type: TokenType) {
+        self._add_token(token_type, None)
+    }
+
+    fn _add_token(&self, token_type: TokenType, literal: Option<Object>) {
         let text = self.source.substring(self.start, self.current);
-        self.tokens.push(Token::new(
-            token_type,
-            text.to_owned(),
-            Some(literal),
-            self.line,
-        ))
+        self.tokens
+            .push(Token::new(token_type, text.to_owned(), literal, self.line))
     }
 
     fn advance(&mut self) -> char {

@@ -103,12 +103,22 @@ impl Scanner {
             _ => {
                 if self.is_digit(c) {
                     self.number();
+                } else if self.is_alpha(c) {
+                    self.identifier();
                 } else {
                     let lox = Lox::new();
                     lox.error(self.line, "Unexpected character");
                 }
             }
         }
+    }
+
+    fn identifier(&self) {
+        while self.is_alpha_numeric(self.peek()) {
+            self.advance();
+        }
+
+        self.add_token(TokenType::IDENTIFIER);
     }
 
     fn number(&mut self) {
@@ -141,6 +151,14 @@ impl Scanner {
             return '\0';
         }
         return self.source.chars().nth(self.current + 1).unwrap();
+    }
+
+    fn is_alpha(&self, c: char) -> bool {
+        (c >= 'a' && c <= 'z') || (c <= 'A' && c <= 'Z') || c == '_'
+    }
+
+    fn is_alpha_numeric(&self, c: char) -> bool {
+        self.is_alpha(c) || self.is_digit(c)
     }
 
     fn string(&mut self) {

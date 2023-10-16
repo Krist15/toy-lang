@@ -1,5 +1,6 @@
 #[allow(non_camel_case_types)]
-enum TokenType {
+#[derive(Debug, Clone)]
+pub enum TokenType {
     // Single-character tokens.
     LEFT_PAREN,
     RIGHT_PAREN,

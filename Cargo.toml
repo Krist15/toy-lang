@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
+strum = { version = "0.25.0", features = ["derive"] }
+strum_macros = "0.25.3"
 substring = "1.4.5"

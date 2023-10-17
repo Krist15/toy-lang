@@ -5,7 +5,6 @@ use crate::{
     token::{Object, Token},
     token_type::TokenType,
 };
-use substring::Substring;
 
 extern crate lazy_static;
 
@@ -146,7 +145,7 @@ impl Scanner {
             self.advance();
         }
 
-        let text = self.source.substring(self.start, self.current);
+        let text = &self.source[self.start..self.current];
 
         let token_type = KEYWORDS.get(text).unwrap_or(&TokenType::IDENTIFIER);
 
@@ -169,8 +168,7 @@ impl Scanner {
         self._add_token(
             TokenType::NUMBER,
             Some(Object::Number(
-                self.source
-                    .substring(self.start, self.current)
+                self.source[self.start..self.current]
                     .to_string()
                     .parse::<f64>()
                     .unwrap(),
@@ -209,10 +207,7 @@ impl Scanner {
 
         self.advance();
 
-        let value = self
-            .source
-            .substring(self.start + 1, self.current - 1)
-            .to_string();
+        let value = self.source[self.start + 1..self.current - 1].to_string();
         self._add_token(TokenType::STRING, Some(Object::String(value)));
     }
 
@@ -243,7 +238,7 @@ impl Scanner {
     }
 
     fn _add_token(&mut self, token_type: TokenType, literal: Option<Object>) {
-        let text = self.source.substring(self.start, self.current);
+        let text = &self.source[self.start..self.current];
         self.tokens
             .push(Token::new(token_type, text.to_owned(), literal, self.line))
     }

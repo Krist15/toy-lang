@@ -118,9 +118,9 @@ impl Scanner {
                     self.add_token(TokenType::SLASH);
                 }
             }
-            ' ' => {}
-            '\r' => {}
-            '\t' => {}
+            ' ' => (),
+            '\r' => (),
+            '\t' => (),
             '\n' => {
                 self.line += 1;
             }
@@ -192,7 +192,7 @@ impl Scanner {
     }
 
     fn string(&mut self) {
-        while self.peek() != '"' && self.is_at_end() {
+        while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
             }
